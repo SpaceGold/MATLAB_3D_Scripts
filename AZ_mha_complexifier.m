@@ -16,7 +16,7 @@ complex_csv = table2array(complex_csv);
 clc
 rows  = size(complex_csv,1); % get max dimension y
 cols  = size(complex_csv,2); % get max dimension x
-fds = fileDatastore('*.mha', 'ReadFcn', @importdata)
+fds = fileDatastore('*.mha', 'ReadFcn', @importdata);
 fullFileNames = fds.Files; % get volume names
 for column = 1:cols % for each timepoint in csv guide file
     if ~isempty(complex_csv{1,column}) % if column not empty, initialize volume
@@ -25,9 +25,6 @@ for column = 1:cols % for each timepoint in csv guide file
         [volume,vol_info] = ReadData3D(fullFileNames{column}); % import volume data
         for row = 1:rows
             if ~isempty(complex_csv{row, column})
-                % cycle through every value in cell, and remove that label
-                % from volume. make placeholder or pseudocode for future 
-
                 temp_cell = complex_csv{row, column}; % make new 2x1 cell
                 cell_string = string(temp_cell); % of stringed tuple
                 temp_cell = strsplit(cell_string, ','); % into n strings              
@@ -35,8 +32,7 @@ for column = 1:cols % for each timepoint in csv guide file
                 label_matrix = []; % initialize temp matrix of labels
                 for label = 1:n 
                     label_matrix(label) = str2double(temp_cell(label)); % one int each
-                    label_matrix
-                    volume = changem(volume, 0, label_matrix(:)); % merge 
+                    volume = changem(volume, 0, label_matrix(label)); % merge 
                 end
             end  
         end

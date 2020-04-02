@@ -16,9 +16,9 @@ complex_csv = table2array(complex_csv);
 clc
 rows  = size(complex_csv,1); % get max dimension y
 cols  = size(complex_csv,2); % get max dimension x
-fds = fileDatastore('*.mha', 'ReadFcn', @importdata)
+fds = fileDatastore('*.mha', 'ReadFcn', @importdata);
 fullFileNames = fds.Files; % get volume names
-for column = 1:cols % for each timepoint in csv guide file
+ nfor column = 1:cols % for each timepoint in csv guide file
     if ~isempty(complex_csv{1,column}) % if column not empty, initialize volume
         fullName = fullFileNames(column); % prep filename
         [~, name, ext] = fileparts(fullName{1}); % set name and ext % (uses {1} to get name
@@ -35,7 +35,7 @@ for column = 1:cols % for each timepoint in csv guide file
                 label_matrix = []; % initialize temp matrix of labels
                 for label = 1:n 
                     label_matrix(label) = str2double(temp_cell(label)); % one int each
-                    volume = changem(volume, label_1, label_2); % merge. (requires mapping toolkit). Must iterate over same volume, since changem makes a new one.
+                    volume = changem(volume, 0, label_matrix(label)); % merge 
                 end
             end  
         end
