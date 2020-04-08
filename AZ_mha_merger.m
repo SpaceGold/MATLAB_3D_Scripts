@@ -28,7 +28,7 @@ for column = 1:cols % for each column
                 volume = changem(volume, label_1, label_2); % merge. (requires mapping toolkit). Must iterate over same volume, since changem makes a new one.
             end  
         end
-        mhaWriter([name, '_merged', ext], volume, [0.256, 0.216, 0.3398], 'uint8'); % save % VOXEL SPACING HERE
+        mhaWriter(['03_m_', name, ext], volume, [0.256, 0.216, 0.3398], 'double'); % save % VOXEL SPACING HERE
         printout = sprintf('volume %d merged (%s)', column, name); % report
         disp(printout);  
     end

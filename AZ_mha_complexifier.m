@@ -36,7 +36,7 @@ for column = 1:cols % for each timepoint in csv guide file
                 end
             end  
         end
-        mhaWriter(['test_', name, '_complexified', ext], volume, [0.256, 0.216, 0.3398], 'uint8'); % save % VOXEL SPACING HERE
+        mhaWriter(['02_c_', name, ext], volume, [0.256, 0.216, 0.3398], 'double'); % save % VOXEL SPACING HERE
         printout = sprintf('volume %d complexified (%s)', column, name); % report
         disp(printout);  
     end

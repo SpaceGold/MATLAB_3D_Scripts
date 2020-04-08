@@ -5,7 +5,7 @@ clc % Initialize directory, reader, csv guide files
 cd 'C:\Users\amc39\Google Drive\ABC\ZF_Tailbud_Dev\ForAdam_segmentationCuration\ZF_tailbud_development\to_split\'; % keep '\' at end
 import ReadData3D_version1k.*;
 split_csv = readtable('..\..\..\Curation1_ZF_Tailbud_Dev - split.csv');
-split_csv = table2array(split_csv);
+%split_csv = table2array(split_csv);
 %% Omit split - get labels from csvs, organized by column=timepoint
 clc
 rows  = size(split_csv,1); % get max dimension y
@@ -26,12 +26,12 @@ for column = 1:cols % for each timepoint in csv guide file
                 label_matrix = []; % initialize temp matrix of labels
                 for label = 1:n 
                     label_matrix(label) = str2double(temp_cell(label)); % one int each
-                    volume = changem(volume, 0, label_matrix(label)); % merge 
+                    volume = changem(volume, 0, label_matrix(label)); % remove 
                 end
             end  
         end
-        mhaWriter(['test_', name, '_split', ext], volume, [0.256, 0.216, 0.3398], 'uint8'); % save % VOXEL SPACING HERE
-        printout = sprintf('volume %d complexified (%s)', column, name); % report
+        mhaWriter(['02_s_', name, ext], volume, [0.256, 0.216, 0.3398], 'double'); % save % VOXEL SPACING HERE
+        printout = sprintf('volume %d split  (%s)', column, name); % report
         disp(printout);  
     end
 end

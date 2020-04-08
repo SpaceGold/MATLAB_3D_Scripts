@@ -1,4 +1,4 @@
-function mhaWriter(filename, img, resolution, data_type)
+function mhaWriter(filename, img, resolution, data_type) % from gokul
 
 [pathstr,name, ext]=fileparts(filename);
 fid=fopen(filename, 'w');

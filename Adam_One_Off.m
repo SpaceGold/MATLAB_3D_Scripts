@@ -29,16 +29,10 @@ toc
 
 %%  if simply converting raw tif to mha:
 clc 
-% fnSegTif = 'D:\He Lab Viz2\Complete Mask Files\P0\ROI7_P0+Cilia_Movie\cilia_new\Thresh3_Cilia_ROI7_P3_standard.tif'; % read a TIF(f) file
-% imRawTif = readtiff(fnSegTif); 
-% mhaWriter([fnSegTif(1:end-4)  '.mha'], imRawTif, [1,1,1], 'uint8');
-% 
-% % optional
-% mhaWriter([fnSegTif(1:end-4)  '_binary.mha'], logical(imRawTif), [1,1,1], 'uint8');
 
-fnRawTif = 'D:\He Lab Viz2\Complete Mask Files\P0\ROI7_P0+Cilia_Movie\cilia_new\Thresh3_Cilia_ROI7_P3_standard.tif';
+fnRawTif = 'C:\Users\amc39\Google Drive\ABC\ZF_Tailbud_Dev\ForAdam_segmentationCuration\ZF_tailbud_development\SeedNuclei_AZ\+2_centers0_zf_0000.tif';
 imRawTif = readtiff(fnRawTif); % read a TIF(f) file
-mhaWriter([fnRawTif(1:end-4) '.mha'], logical(imRawTif), [1,1,1], 'uint8');
+mhaWriter([fnRawTif(1:end-4) '.mha'], imRawTif, [1,1,1], 'double');
 % imRawMha = mhaReader([fnRawTif(1:end-4) '.mha']); % ?? [imRawMha,~]?
 
 %% combine ITK seg with raw, collapsing ITK channels to binary
@@ -85,13 +79,24 @@ writetiff(uint8(imSegTif), [fnSegTif(1:end-4) '_thresh=', threshold, '.tif']);
 
 
 
+%% mha binary mask to tiff 
+
+clear global
+clearvars global
+
+% label mha
+fnLabels = 'C:\Users\amc39\Google Drive\ABC\ZF_Tailbud_Dev\ForAdam_segmentationCuration\ZF_tailbud_development\SeedNuclei_AZ\completed_first_pass\centers0_zf_0000.mha';
+[imLabels,~] = mhaReader(fnLabels);
+
+writetiff(uint8(imLabels),['centers0_zf_0000.tif']);
+done = 'done'
 
 
 %% fix / add missing pieces to BB seg
 
 clear global
 clearvars global
-rt = 'D:\He Lab Viz2\Doubles_Project_Viz2\P14_ROI8\'; % must include \ at end
+rt = 'C:\Users\amc39\Google Drive\ABC\ZF_Tailbud_Dev\ForAdam_segmentationCuration\ZF_tailbud_development\SeedNuclei_AZ\'; % must include \ at end
 
 % filepath of raw tif file 
 fnRawTif = 'ROI_8_P14-2_8x8x8nm_1.25MHz_95umX4000_4646_Y3029_3696_Z3100_3696.tif';
