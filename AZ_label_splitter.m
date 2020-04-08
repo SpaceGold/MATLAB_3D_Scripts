@@ -17,7 +17,7 @@ for set = 1:setCount
        %mhaWriter(['test_all_', name, sprintf('label_%d',label), ext], mask, [1,1,1], 'uint8'); % save
        %temp_vol = zeros(size(labelMatrix),'uint8'); % reinitialize raw data
        %temp_vol(mask) = labelMatrix(mask); % set everything outside the mask to zero
-       se = strel('sphere',8); % set structured element for dilation
+       se = strel('sphere',37); % set structured element for dilation
        dilated_vol = imdilate(temp_vol,se);
        mhaWriter(['test_', name, sprintf('label_%d',label), ext], dilated_vol, [1,1,1], 'uint8'); % save
        size(dilated_vol, 1)
