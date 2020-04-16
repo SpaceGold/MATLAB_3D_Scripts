@@ -53,7 +53,7 @@ for element = 1:ccLen
     tempArray = CC.PixelIdxList(element);
     y = length(tempArray{1});
     if y > highest
-        highest = y;
+        highest = y;  
         tag = element;
     end
 end
@@ -62,8 +62,19 @@ CC_report = sprintf('CC %d is the largest at %d voxels', tag, highest);
 disp(CC_report);
 
 % flag highest CC
-ccMembrane = CC.PixelIdxList(tag);
-mhaWriter(['ccM_16.mha'], ccMembrane, [1,1,1], 'uint8'); % save
+ccMembrane = ccCompound == tag;
+
+%%
+% specifically for Vignesh, fill in label with solid binary voxels
+
+
+
+
+% reintroduce raw data
+
+
+
+% mhaWriter('ccM_16.mha', ccMembrane, [1,1,1], 'uint8'); % save
 
 toc
 

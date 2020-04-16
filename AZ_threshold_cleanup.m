@@ -62,13 +62,13 @@ CC_report = sprintf('CC %d is the largest at %d voxels', tag, highest);
 disp(CC_report);
 
 % flag highest CC
-ccMembrane = CC.PixelIdxList{tag};
+ccMembrane = ccCompound == tag;
 
 %%
-% convert nx1 array into original coordinates
-ccMembrane = labelmatrix(ccMembrane);
-
 % specifically for Vignesh, fill in label with solid binary voxels
+
+
+
 
 % reintroduce raw data
 
