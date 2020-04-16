@@ -2,6 +2,7 @@
 % Adam Zimmerman 2020
 
 % To-do:
+% make thresholding and erosion bulletproof or at least user-optimizable
 % make script into function(s)/modularize
 % generalize even more
 % add interpolate:
@@ -35,8 +36,6 @@ if nSet ~= nRaw % validate and report label files match raw files
 else
     labelReport = sprintf('%d set(s) of labels found.', nSet); disp(labelReport);
 end
-%%
-
 dKr = 50; % <<<< set dilation kernal size for dilation <<<<
 eKr = 3; % <<<< set erosion kernal for erosion <<<<
 thresh = 56; % <<<< set threshold for object of intrest (Vignesh's memb =< 58)
@@ -49,17 +48,17 @@ for set = 1:nSet % split label sets
     disp(rawReport);
     for label = 1:label_count % w/n label set, dilate, crop, erode, save masks
         progress = sprintf('Processing mask %d:',label); disp(progress);
-%         tic
-%         mask = label_matrix == label; % make full size volume of just 1 label
-%         se = strel('sphere',dKr); % dilation
-%         dilated_mask = imdilate(mask,se);
-%         center = regionprops3(dilated_mask, 'centroid'); % prep for crop
-%         mask = dilated_mask;
-%         toc
-%         tic
-        % for debugging:
-        [mask,vol_info] = ReadData3D('C:\Users\amc39\Google Drive\ABC\Vignesh_SP\test0_ROI1_10x10x10bin_200kHz_align_inv_Seeded_label_1.mha'); % import label volume
-        
+        tic
+        mask = label_matrix == label; % make full size volume of just 1 label
+        se = strel('sphere',dKr); % dilation
+        dilated_mask = imdilate(mask,se);
+        center = regionprops3(dilated_mask, 'centroid'); % prep for crop
+        mask = dilated_mask;
+        toc
+        tic
+%         % for debugging:
+%         [mask,vol_info] = ReadData3D('C:\Users\amc39\Google Drive\ABC\Vignesh_SP\test0_ROI1_10x10x10bin_200kHz_align_inv_Seeded_label_1.mha'); % import label volume
+%         
         % combine with raw data, and then crop the result.
         % this should be equivalently performant as cropping separately first.
         raw = rawMatrix{set}; % introduce corresponding raw data
@@ -80,25 +79,23 @@ for set = 1:nSet % split label sets
         % threshold - not lining up properly
         %smallMask(smallMask<thresh) = 0;
         %smallMask =logical(smallMask);
-        
-%                % erode
-        CC = bwconncomp(croppedMask, 26); %survey the volume for connected components
-        % discard small components (assumed to be noise or debris on glass slide)
-        csize = cellfun(@numel, CC.PixelIdxList); % size of all objects in voxels
-        idx = csize>=500; % <<<<<<<<<<<<<<<<<<< EXPERIMENT WITH THIS
-        CC.NumObjects = sum(idx);
-        CC.PixelIdxList = CC.PixelIdxList(idx);
-        mask = croppedMask(CC)~=0;
-        mask = imerode(mask, eKr); % erode
-        newim_2 = zeros(size(mask),'uint8'); % reinitialize raw data
-        newim_2(mask) = im(mask); % set everything outside the mask to zero
-        tic
-        fn_newim_2 = [rt filesep p.AnalysisPath filesep 'segCh3_' 'ekr' num2str(p.ekr) '_dkrbb' num2str(p.dkr_bb) '_dkrc' num2str(p.dkr_c) '_min_P_bb' num2str(p.min_P_bb) '_max_p_bk' num2str(p.max_p_bk) '_minBBsize' num2str(p.minBBsize) '_' fn_probabilities];
-        % writetiff(newim_2, fn_newim_2);
-        mhaWriter(['test_erode_', name, sprintf('_%d',blob), ext], Vout, [1,1,1], 'uint8'); % save
-        toc
- 
-       
+%         
+% %                % erode
+%         CC = bwconncomp(croppedMask, 26); %survey the volume for connected components
+%         % discard small components (assumed to be noise or debris on glass slide)
+%         csize = cellfun(@numel, CC.PixelIdxList); % size of all objects in voxels
+%         idx = csize>=500; % <<<<<<<<<<<<<<<<<<< EXPERIMENT WITH THIS
+%         CC.NumObjects = sum(idx);
+%         CC.PixelIdxList = CC.PixelIdxList(idx);
+%         mask = croppedMask(CC)~=0;
+%         mask = imerode(mask, eKr); % erode
+%         newim_2 = zeros(size(mask),'uint8'); % reinitialize raw data
+%         newim_2(mask) = im(mask); % set everything outside the mask to zero
+%         tic
+%         fn_newim_2 = [rt filesep p.AnalysisPath filesep 'segCh3_' 'ekr' num2str(p.ekr) '_dkrbb' num2str(p.dkr_bb) '_dkrc' num2str(p.dkr_c) '_min_P_bb' num2str(p.min_P_bb) '_max_p_bk' num2str(p.max_p_bk) '_minBBsize' num2str(p.minBBsize) '_' fn_probabilities];
+%         % writetiff(newim_2, fn_newim_2);
+%  
+%        
         %suffix = ['se_' dKr '_label_' label]; % buggy
         mhaWriter(['test1_', name, sprintf('_label_%d',label), ext], croppedMask, [1,1,1], 'uint8'); % save
         toc          

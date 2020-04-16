@@ -110,7 +110,7 @@ csize = cellfun(@numel, CC.PixelIdxList); % size of all objects in voxels
 idx = csize>=ms; % index potential candidates for bb
 CC.NumObjects = sum(idx);
 CC.PixelIdxList = CC.PixelIdxList(idx);
-mask = labelmatrix(CC)~=0;
+mask = labelmatrix(CC)~=0; 
 if p.nCh ==2
     se = dse_c;
 else

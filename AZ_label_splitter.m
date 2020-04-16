@@ -2,6 +2,7 @@
 % Adam Zimmerman 2020
 
 % To-do:
+% make thresholding and erosion bulletproof or at least user-optimizable
 % make script into function(s)/modularize
 % generalize even more
 % add interpolate:
@@ -32,7 +33,7 @@ nSet = size(fullFileNames, 1); % loop through all label sets
 if nSet ~= nRaw % validate and report label files match raw files
     countError = 'Number of raw files does not match number of label sets'
     disp(countError);
-else
+else 
     labelReport = sprintf('%d set(s) of labels found.', nSet); disp(labelReport);
 end
 dKr = 50; % <<<< set dilation kernal size for dilation <<<<
