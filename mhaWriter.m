@@ -6,7 +6,7 @@ if(fid<=0)
     printf('Impossible to open file %s\n', filename);
 end
 
-s = size(img)
+s = size(img);
 
 if numel(s) == 2
     fprintf(fid, 'NDims = 2\n'); % Change this to the number of dimensions in your data set

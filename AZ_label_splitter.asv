@@ -4,23 +4,16 @@ function AZ_label_splitter (varargin)
 
 ip = inputParser;
 ip.CaseSensitive = false;
-ip.addRequired('rt', @ischar); % root for new dir and masks
-ip.addParameter('AnalysisPath', 'Masks', @ischar); % new dir
+ip.addRequired('rt', 'C:\Users\amc39\Google Drive\ABC\Vignesh_SP\', @ischar); % root for new dir and masks
+ip.addParameter('AnalysisPath', 'Crops', @ischar); % new dir
 ip.addRequired('fn_crop', @ischar); % cropped raw data in
-ip.addParameter('thresh', 48, @isnumeric); % threshold
-ip.addParameter('dKr', 1, @isnumeric); % dilation kernel radius for gaps
-ip.addParameter('eKr', 1, @isnumeric); % erosion kernel radius for gaps
-ip.addParameter('conn', 18, @isnumeric); % conn mode: 6, 18, or 26
-ip.addParameter('minCCsize', 1500, @isnumeric); % conn comp size in voxels
-ip.addParameter('save open', 1, @isboolean); % save open mask?
-ip.addParameter('save closed', 1, @isboolean); % save closed mask?
 
 p = ip.Results;
 mkdir([rt filesep p.AnalysisPath]);
 
 
 % raw data file management:
-cd 'C:\Users\amc39\Google Drive\ABC\Vignesh_SP\'; 
+cd rt; 
 rawFds = fileDatastore('Raw*', 'ReadFcn', @importdata);
 rawFullNames = rawFds.Files; % get raw names, e.g. Raw_ROI1.mha, Raw_ROI2.mha
 nRaw = size(rawFullNames, 1);
@@ -83,7 +76,8 @@ for set = 1:nSet % split label sets
         croppedMask = rawSmall .* logical(croppedMask); % combine
         toc
         tic
-        mhaWriter(['crop_', name, sprintf('_label%d',label), ext], croppedMask, [1,1,1], 'uint8'); % save
+        fn_crop = ;
+        mhaWriter(fn, croppedMask, [1,1,1], 'uint8'); % save
         toc          
     end
 end
