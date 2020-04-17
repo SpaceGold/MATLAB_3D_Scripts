@@ -5,14 +5,15 @@
 [mask,vol_info] = ReadData3D('C:\Users\amc39\Google Drive\ABC\Vignesh_SP\test1_ROI1_10x10x10bin_200kHz_align_inv_Seeded_label_16.mha'); % import label volume
        
 
-thresh = 49; % <<<< set threshold for object of intrest (Vignesh's memb =< 58)
+thresh = 48; % <<<< set threshold for object of intrest (Vignesh's memb =< 58)
 
 
 % threshold - not lining up properly
 mask(mask<thresh) = 0;
 mask = logical(mask);
 % mhaWriter(['bthresh_16.mha'], mask, [1,1,1], 'uint8'); % save
-%%
+
+tic
 dKr = 1; % <<<< set dilation kernal size for dilation <<<<
 eKr = 1; % <<<< set erosion kernal for erosion <<<<
 
@@ -29,20 +30,20 @@ eroded_mask = imerode(dilated_mask,se_e);
 
 mask = eroded_mask;
 
-
-%% initialize all CC
+toc
+%initialize all CC
 clc
 tic
-CC = bwconncomp(mask==1, 6); %survey the volume for connected components
+CC = bwconncomp(mask==1, 18); %survey the volume for connected components
 % discard small components (assumed to be noise or debris on glass slide)
 csize = cellfun(@numel, CC.PixelIdxList); % size of all objects in voxels
-idx = csize>=1000; % <<<<<<<<<<<<<<<<<<< EXPERIMENT WITH THIS
+idx = csize>=1500; % <<<<<<<<<<<<<<<<<<< EXPERIMENT WITH THIS
 CC.NumObjects = sum(idx);
 CC.PixelIdxList = CC.PixelIdxList(idx);
 ccLen = length(CC.PixelIdxList);
 ccCompound = labelmatrix(CC); % if ~=0 it collapses all to binary % n labels -> 1 vol
 toc
-%% select largest CC
+% select largest CC
 % ccCompound = ccCompound == 5; % 3 happens to be the membrane for Vignesh in 1.16 for cc18; 5 for cc6
 % mhaWriter(['ccc_16.mha'], ccCompound, [1,1,1], 'uint8'); % save
 clc
@@ -67,8 +68,26 @@ ccMembrane = ccCompound == tag;
 %%
 % specifically for Vignesh, fill in label with solid binary voxels
 
+mhaWriter(['Closed_bef_16.mha'], ccMembrane, [1,1,1], 'uint8'); % save
 
+clc
+% tic
+% ccMembrane = double(ccMembrane);
+tic
+closedMemb = logical(zeros(size(ccMembrane)));
+for zSlice = 1:size(ccMembrane, 3)
+    closedSlice = bwconvhull(ccMembrane(:,:,zSlice));
+    closedMemb(:,:,zSlice) = closedSlice;    
+end
+mhaWriter(['Closed_aft_16.mha'], closedMemb, [1,1,1], 'uint8'); % save
+toc
+%%
+[X,~,~] = meshgrid(1:size(ccMembrane,1), 1:size(ccMembrane,2), 1:size(ccMembrane,3));
+%%
+closedMem = alphaShape([X,Y,Z]);
+% mhaWriter(['CCM-bef_16.mha'], ccMembrane, [1,1,1], 'uint8'); % save
 
+mhaWriter(['CCM-aft_16.mha'], closedMem, [1,1,1], 'uint8'); % save
 
 % reintroduce raw data
 
