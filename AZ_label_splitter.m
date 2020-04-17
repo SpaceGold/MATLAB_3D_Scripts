@@ -1,7 +1,8 @@
 function AZ_label_splitter (varargin)
 % Divide mha label sets into individual, cropped, blob-segmented ROIs/masks
 % Adam Zimmerman 2020
-
+%% unfinished
+import ReadData3D_version1k.*;
 ip = inputParser;
 ip.CaseSensitive = false;
 ip.addParameter('rt', 'C:\Users\amc39\Google Drive\ABC\Vignesh_SP\', @ischar); % root for new dir and masks
@@ -11,7 +12,7 @@ p = ip.Results;
 newRt = [rt filesep p.AnalysisPath];
 mkdir(newRt);
 
-
+%%
 % raw data file management:
 cd rt; 
 rawFds = fileDatastore('Raw*', 'ReadFcn', @importdata);
