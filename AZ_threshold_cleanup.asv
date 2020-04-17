@@ -1,53 +1,58 @@
-% function AZ_threshold_cleanup (rt, fn_raw, varargin)
-% takes in cropped raw ROI mha and returns a segmented structure
+function AZ_threshold_cleanup (rt, fn_raw, varargin)
+% Takes in cropped raw ROI mha and returns an open and/or closed mask.
+% Originally developed for masking a singled cropped FIB-SEM nucleus.
 % Adam Zimmerman, 2020
 
-[mask,vol_info] = ReadData3D('C:\Users\amc39\Google Drive\ABC\Vignesh_SP\test1_ROI1_10x10x10bin_200kHz_align_inv_Seeded_label_16.mha'); % import label volume
-       
+ip = inputParser;
+ip.CaseSensitive = false;
+ip.addRequired('rt', @ischar); % root for new dir and masks
+ip.addParameter('AnalysisPath', 'Masks', @ischar); % new dir
+ip.addRequired('fn_crop', @ischar); % cropped raw data in
+ip.addParameter('thresh', 48, @isnumeric); % threshold
+ip.addParameter('dKr', 1, @isnumeric); % dilation kernel radius for gaps
+ip.addParameter('eKr', 1, @isnumeric); % erosion kernel radius for gaps
+ip.addParameter('conn', 18, @isnumeric); % conn mode: 6, 18, or 26
+ip.addParameter('minCCsize', 1500, @isnumeric); % conn comp size in voxels
+ip.addParameter('save open', 1, @isboolean); % save open mask?
+ip.addParameter('save closed', 1, @isboolean); % save closed mask?
 
-thresh = 49; % <<<< set threshold for object of intrest (Vignesh's memb =< 58)
+p = ip.Results;
+mkdir([rt filesep p.AnalysisPath]);
 
+% load
+tic
+[mask,~] = ReadData3D([rt filesep fn_crop]);
 
-% threshold - not lining up properly
+% threshold
 mask(mask<thresh) = 0;
 mask = logical(mask);
-% mhaWriter(['bthresh_16.mha'], mask, [1,1,1], 'uint8'); % save
-%%
-tic
-dKr = 1; % <<<< set dilation kernal size for dilation <<<<
-eKr = 1; % <<<< set erosion kernal for erosion <<<<
 
 % dilate to fill some gaps
+dKr = 1;
+eKr = 1;
 se_d = strel('sphere',dKr); % dilation
 dilated_mask = imdilate(mask,se_d);
-% mhaWriter(['d1_thresh_16.mha'], dilated_mask, [1,1,1], 'uint8'); % save
-
 
 % erode
 se_e = strel('sphere',eKr); 
 eroded_mask = imerode(dilated_mask,se_e);
-% mhaWriter(['e1_thresh_16.mha'], eroded_mask, [1,1,1], 'uint8'); % save
-
 mask = eroded_mask;
-
 toc
-%% initialize all CC
-clc
+
+%initialize all CC
+ccIntReport = 'beginning connected component search';
+disp(ccIntReport);
 tic
-CC = bwconncomp(mask==1, 6); %survey the volume for connected components
+CC = bwconncomp(mask==1, conn); %survey the volume for connected components
 % discard small components (assumed to be noise or debris on glass slide)
 csize = cellfun(@numel, CC.PixelIdxList); % size of all objects in voxels
-idx = csize>=1000; % <<<<<<<<<<<<<<<<<<< EXPERIMENT WITH THIS
+idx = csize>=minCCsize; % size of CC structure. default 1500 voxels
 CC.NumObjects = sum(idx);
 CC.PixelIdxList = CC.PixelIdxList(idx);
 ccLen = length(CC.PixelIdxList);
-ccCompound = labelmatrix(CC); % if ~=0 it collapses all to binary % n labels -> 1 vol
-toc
-%% select largest CC
-% ccCompound = ccCompound == 5; % 3 happens to be the membrane for Vignesh in 1.16 for cc18; 5 for cc6
-% mhaWriter(['ccc_16.mha'], ccCompound, [1,1,1], 'uint8'); % save
-clc
-tic
+ccCompound = labelmatrix(CC); % n labels -> 1 vol; if ~=0, collapses all to binary 
+
+% select largest CC
 highest = 0;
 tag = 0;
 for element = 1:ccLen
@@ -58,49 +63,41 @@ for element = 1:ccLen
         tag = element;
     end
 end
+ccMembrane = ccCompound == tag; % flag highest CC
 toc
-CC_report = sprintf('CC %d is the largest at %d voxels', tag, highest);
-disp(CC_report);
+fprintf('CC %d is the largest at %d voxels\n', tag, highest);
 
-% flag highest CC
-ccMembrane = ccCompound == tag;
-
-%%
-% specifically for Vignesh, fill in label with solid binary voxels
-
-% mhaWriter(['CCM-bef_16.mha'], ccMembrane, [1,1,1], 'uint8'); % save
-
-clc
-% tic
-% ccMembrane = double(ccMembrane);
-closedMemb = logical(zeros(size(ccMembrane)));
-for zSlice = 1:size(ccMembrane, 3)
-    closedSlice = bwconvhull(ccMembrane(:,:,zSlice));
-    closedMemb(:,:,zSlice) = closedSlice;    
+%% specifically for Vignesh, fill in label with solid binary voxels
+if closed == 1
+    tic
+    closedMemb = FALSE(zeros(size(ccMembrane)));
+    for zSlice = 1:size(ccMembrane, 3) % iterate 2D workaround in lieu of alphaSpace()
+        closedSlice = bwconvhull(ccMembrane(:,:,zSlice)); % bwconvhull() is 2D
+        closedMemb(:,:,zSlice) = closedSlice;    
+    end
+    toc
 end
-mhaWriter(['CCCl_16.mha'], closedMemb, [1,1,1], 'uint8'); % save
-
-%%
-[X,~,~] = meshgrid(1:size(ccMembrane,1), 1:size(ccMembrane,2), 1:size(ccMembrane,3));
-%%
-closedMem = alphaShape([X,Y,Z]);
-% mhaWriter(['CCM-bef_16.mha'], ccMembrane, [1,1,1], 'uint8'); % save
-
-mhaWriter(['CCM-aft_16.mha'], closedMem, [1,1,1], 'uint8'); % save
-
-% reintroduce raw data
-
-
-
-% mhaWriter('ccM_16.mha', ccMembrane, [1,1,1], 'uint8'); % save
-
-toc
-
-
-
-
-
-
-
-
-% end
+%% save open if doing so
+if open == 1
+tic
+    fn_newim_1 = [rt filesep p.AnalysisPath filesep 'open_'...
+        'thresh' num2str(p.thresh)...
+        '_dkr' num2str(p.dkr) '_ekr' num2str(p.ekr)...
+        'conn' conn '_minCCsize' num2str(p.minCCsize) 'fn_crop'];
+    mhaWriter(fn_newim_1, ccMembrane, [1,1,1], 'uint8');
+    toc
+    saveReport1 = 'saved open mask';
+    disp(saveReport1);
+end
+%% save closed if doing so
+if closed == 1
+    tic
+    fn_newim_2 = [rt filesep p.AnalysisPath filesep 'closed_'...
+        'thresh' num2str(p.thresh)...
+        '_dkr' num2str(p.dkr) '_ekr' num2str(p.ekr)...
+        'conn' conn '_minCCsize' num2str(p.minCCsize) 'fn_crop'];
+    toc
+    saveReport2 = 'saved closed mask';
+    disp(saveReport2);
+end
+end
