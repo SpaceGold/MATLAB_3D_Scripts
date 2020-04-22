@@ -29,78 +29,78 @@ while ( ~isempty(line) )
     switch type
         case 'ObjectType'
             A = sscanf(line, 'ObjectType = %s');
-            info.ObjectType = A
+            info.ObjectType = A;
         case 'NDims'
             A = sscanf(line, 'NDims = %d');
-            info.NDims = A
+            info.NDims = A;
         case 'BinaryData'
             A = sscanf(line, 'ObjectType = %s');
             info.ObjectType = A;
         case 'ElementByteOrderMSB'
             A = sscanf(line, 'ElementByteOrderMSB = %s');
             if (strcmpi(A, 'true'))
-                info.BinaryData = true
+                info.BinaryData = true;
             else
-                info.BinaryData = false
+                info.BinaryData = false;
             end
         case 'CompressedData'
             A = sscanf(line, 'CompressedData = %s');
             if (strcmpi(A, 'true'))
-                info.CompressedData = true
+                info.CompressedData = true;
             else
-                info.CompressedData = false
+                info.CompressedData = false;
             end
         case 'TransformMatrix'
             if (info.NDims == 2)
                 A = sscanf(line, 'TransformMatrix = %f %f %f %f');
-                info.TransformMatrix = reshape(A, 2, 2)
+                info.TransformMatrix = reshape(A, 2, 2);
             elseif (info.NDims == 3)
                 A = sscanf(line, 'TransformMatrix = %f %f %f %f %f %f %f %f %f');
-                info.TransformMatrix = reshape(A, 3, 3)
+                info.TransformMatrix = reshape(A, 3, 3);
             end
         case 'Offset'
             if (info.NDims == 2)
                 A = sscanf(line, 'Offset = %f %f');
-                info.Offset = A
+                info.Offset = A;
             elseif (info.NDims == 3)
                 A = sscanf(line, 'Offset = %f %f %f');
-                info.Offset = A
+                info.Offset = A;
             end
         case 'CenterOfRotation'
             if (info.NDims == 2)
                 A = sscanf(line, 'CenterOfRotation = %f %f');
-                info.CenterOfRotation = A
+                info.CenterOfRotation = A;
             elseif (info.NDims == 3)
                 A = sscanf(line, 'CenterOfRotation = %f %f %f');
-                info.CenterOfRotation = A
+                info.CenterOfRotation = A;
             end
         case 'ElementSpacing'
             if (info.NDims == 2)
                 A = sscanf(line, 'ElementSpacing = %f %f');
-                info.ElementSpacing = A
+                info.ElementSpacing = A;
             elseif (info.NDims == 3)
                 A = sscanf(line, 'ElementSpacing = %f %f %f');
-                info.ElementSpacing = A
+                info.ElementSpacing = A;
             end
         case 'DimSize'
             if (info.NDims == 2)
                 A = sscanf(line, 'DimSize = %d %d');
-                info.DimSize = A
+                info.DimSize = A;
             elseif (info.NDims == 3)
                 A = sscanf(line, 'DimSize = %d %d %d');
-                info.DimSize = A
+                info.DimSize = A;
             end
         case 'AnatomicalOrientation'
             if (info.NDims == 2)
                 A = sscanf(line, 'AnatomicalOrientation = %s');
-                info.AnatomicalOrientation = A
+                info.AnatomicalOrientation = A;
             elseif (info.NDims == 3)
                 A = sscanf(line, 'AnatomicalOrientation = %s');
                 info.AnatomicalOrientation = A;
             end
         case 'ElementType'
             A = sscanf(line, 'ElementType = %s');
-            info.ElementType = A
+            info.ElementType = A;
 
             precision = '*uchar';  % * indicates no conversion
             if (strcmpi(strtrim(info.ElementType), 'MET_USHORT'))
@@ -158,10 +158,10 @@ while ( ~isempty(line) )
                     end
                     fclose(fid2);
                 end
-                info.DimSize(1)
-                info.DimSize(2)
-                info.DimSize(3)
-                size(image)
+                info.DimSize(1);
+                info.DimSize(2);
+                info.DimSize(3);
+                size(image);
                 for k = 1:info.ElementNumberOfChannels
                    Im(:,:,:,k) = reshape(image(1 : info.ElementNumberOfChannels : end), info.DimSize(1), info.DimSize(2), info.DimSize(3) );
                 end
